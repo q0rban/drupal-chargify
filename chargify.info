@@ -1,0 +1,5 @@
+; $Id$
+name = Chargify Module
+description = Schema and Views for Chargify Subscriptions
+dependencies[] = chargify_api
+core = 6.x
