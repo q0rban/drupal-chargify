@@ -9,7 +9,7 @@
 /**
  * Implementation of hook_schema().
  */
-function chargify_api_schema() {
+function chargify_schema() {
   $schema['chargify_subscriptions'] = array(
     'description' => t('Chargify Subscriptions'),
     'fields' => array(
@@ -54,7 +54,7 @@ function chargify_api_schema() {
 /**
  * Implementation of hook_install().
  */
-function chargify_api_install() {
+function chargify_install() {
   // Create tables.
-  drupal_install_schema('chargify_api');
+  drupal_install_schema('chargify');
 }
