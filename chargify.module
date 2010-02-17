@@ -8,3 +8,11 @@
  *   Build by Sprocket.
  *   http://sprocketcreative.com
  */
+
+define('CHARGIFY_TRIALING', 'trialing');
+define('CHARGIFY_ACTIVE', 'active');
+define('CHARGIFY_SOFT_FAILURE', 'soft_failure');
+define('CHARGIFY_PAST_DUE', 'past_due');
+define('CHARGIFY_SUSPENDED', 'suspended');
+define('CHARGIFY_CLOSED', 'closed');
+define('CHARGIFY_EXPIRED', 'expired');
