@@ -16,3 +16,134 @@ define('CHARGIFY_PAST_DUE', 'past_due');
 define('CHARGIFY_SUSPENDED', 'suspended');
 define('CHARGIFY_CLOSED', 'closed');
 define('CHARGIFY_EXPIRED', 'expired');
+
+/**
+ * Implementation of hook_user().
+ */
+function chargify_user($op, &$edit, &$account, $category = NULL) {
+  switch ($op) {
+    case 'load':
+      $account->customer_id = chargify_uid_to_customer_id($account->uid);
+      $account->subscriptions = chargify_get_subscriptions($account);
+      break;
+    case 'insert':
+      if (isset($account->customer_id)) {
+        chargify_user_insert($account);
+      }
+    case 'delete':
+      chargify_user_delete($account);
+      break;
+  }
+}
+
+/**
+ * Load up all subscriptions for a user.
+ *
+ * @param $account
+ *   The Drupal user object to retrieve the subscriptions for.
+ * @return
+ *   An array of subscription objects
+ */
+function chargify_get_subscriptions($account) {
+  $records = chargify_get_subscription_records($account);
+  $subscriptions = array();
+
+  foreach (chargify_api_customer_get_subscriptions($account->customer_id) as $subscription) {
+    $subscriptions[$subscription->id] = $subscription;
+  }
+
+  return $subscriptions;
+}
+
+/**
+ * Load up all database subscriptions for a user.
+ *
+ * @param $account
+ *   The Drupal user object to retrieve the subscription records for.
+ * @return
+ *   An array of subscription records from the db, keyed by the Chargify 
+ *   subscription id.
+ */
+function chargify_get_subscription_records($account) {
+  $subscriptions = array();
+  $result = db_query("SELECT * FROM {chargify_subscriptions} WHERE uid = %d", $account->uid);
+
+  while ($subscription = db_fetch_object($result)) {
+    $subscriptions[$subscription->subscription_id] = $subscription;
+  }
+
+  return $subscriptions;
+}
+
+/**
+ * Store the chargify customer id to the db.
+ *
+ * @param $account
+ *   The Drupal user object to save.
+ */
+function chargify_user_insert(&$account) {
+  drupal_write_record('chargify_customers', $account);
+
+  if (isset($account->subscriptions)) {
+    $subscriptions = array();
+
+    foreach ($account->subscriptions as $key => $subscription) {
+      $subscription->uid = $account->uid;
+      $subscriptions[$key] = chargify_subscription_save($subscription);
+    }
+
+    $account->subscriptions = $subscriptions;
+  }
+}
+
+/**
+ * Inserts or updates a subscription record.
+ *
+ * @param $subscription
+ *   An instance of the chargify_subscription class.
+ */
+function chargify_subscription_save($subscription, $uid = NULL) {
+  $record = new stdClass();
+  $product = $subscription->getProduct();
+  $customer = $subscription->getCustomer();
+
+  $record->subscription_id = $subscription->getId();
+  $record->product_handle = $product->getHandle();
+  $record->uid
+  if (!isset($subscription->product_handle) && isset($subscription->product) && is_object($subscription->product)) {
+    $subscription->product_handle = $subscription->product->product_handle;
+  }
+
+  // If there's a record_id, we're updating an existing row.
+  if (isset($subscription->record_id)) {
+    drupal_write_record('chargify_subscriptions', $subscription, array('record_id'));
+  }
+  // Otherwise, write a new row.
+  else {
+    drupal_write_record('chargify_subscriptions', $subscription);
+  }
+
+  return $subscription;
+}
+
+/**
+ * Loads the Chargify customer id from a Drupal user ID.
+ */
+function chargify_uid_to_customer_id($uid) {
+  return db_result(db_query("SELECT customer_id FROM {chargify_customers} WHERE uid = %d", $uid));
+}
+
+/**
+ * Loads the Drupal user ID from a Chargify customer id.
+ */
+function chargify_customer_id_to_uid($id) {
+  return db_result(db_query("SELECT uid FROM {chargify_customers} WHERE customer_id = %d", $id));
+}
+
+/**
+ * A Drupal user is being deleted.
+ */
+function chargify_user_delete($account) {
+  db_query("DELETE FROM {chargify_customers} WHERE uid = %d", $account->uid);
+  db_query("DELETE FROM {chargify_subscriptions} WHERE uid = %d", $account->uid);
+}

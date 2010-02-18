@@ -13,11 +13,22 @@ function chargify_schema() {
   $schema['chargify_subscriptions'] = array(
     'description' => t('Chargify Subscriptions'),
     'fields' => array(
+      'record_id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique record ID.',
+      ),
       'subscription_id' => array(
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
         'description' => 'The subscription unique id within Chargify.',
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The drupal User ID of the customer.',
       ),
       'state' => array(
         'description' => t('The current state of the subscription. It may be "trialing", "active", "soft_failure", "past_due", "suspended", "closed", or "expired".'),
@@ -32,20 +43,32 @@ function chargify_schema() {
         'not null' => TRUE,
       ),
     ),
-    'primary key' => array('subscription_id'),
+    'primary key' => array('record_id'),
+    'unique key' => array('subscription_id'),
+    'indexes' => array(
+      'uid' => array('uid'),
+      'subscription_id' => array('subscription_id'),
+    ),
   );
 
   $schema['chargify_customers'] = array(
     'description' => t('Chargify Customers'),
     'fields' => array(
-      'reference' => array(
-        'description' => t('The reference.'),
-        'type' => 'varchar',
-        'length' => 64,
+      'customer_id' => array(
+        'type' => 'int',
         'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The unique customer id within Chargify.',
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The drupal User ID of the customer.',
       ),
     ),
-    'primary key' => array('reference'),
+    'primary key' => array('customer_id'),
+    'unique key' => array('uid'),
   );
 
   return $schema;
