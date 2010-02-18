@@ -79,7 +79,7 @@ function chargify_get_subscription_records($account) {
     $records[$record->subscription_id] = $record;
   }
 
-  return $record;
+  return $records;
 }
 
 /**
