@@ -23,21 +23,29 @@ define('CHARGIFY_EXPIRED', 'expired');
 function chargify_user($op, &$edit, &$account, $category = NULL) {
   switch ($op) {
     case 'load':
-      $account->customer_id = chargify_uid_to_customer_id($account->uid);
-      $account->subscriptions = chargify_get_subscriptions($account);
+      if ($customer_id = chargify_uid_to_customer_id($account->uid)) {
+        $account->customer_id = $customer_id;
+      }
+      if ($subs = chargify_get_subscription_records($account)) {
+        $account->subscriptions = $subs;
+      }
       break;
     case 'insert':
-      if (isset($account->customer_id)) {
-        chargify_user_insert($account);
+    case 'update':
+      if (isset($edit['customer_id']) || isset($edit['subscriptions'])) {
+        chargify_user_save($account, $edit);
       }
+      break;
     case 'delete':
-      chargify_user_delete($account);
+      if (isset($account->customer_id)) {
+        chargify_user_delete($account);
+      }
       break;
   }
 }
 
 /**
- * Load up all subscriptions for a user.
+ * Load up all Chargify subscriptions for a user.
  *
  * @param $account
  *   The Drupal user object to retrieve the subscriptions for.
@@ -45,7 +53,6 @@ function chargify_user($op, &$edit, &$account, $category = NULL) {
  *   An array of subscription objects
  */
 function chargify_get_subscriptions($account) {
-  $records = chargify_get_subscription_records($account);
   $subscriptions = array();
 
   foreach (chargify_api_customer_get_subscriptions($account->customer_id) as $subscription) {
@@ -56,7 +63,7 @@ function chargify_get_subscriptions($account) {
 }
 
 /**
- * Load up all database subscriptions for a user.
+ * Load up all database subscription records for a user.
  *
  * @param $account
  *   The Drupal user object to retrieve the subscription records for.
@@ -65,33 +72,48 @@ function chargify_get_subscriptions($account) {
  *   subscription id.
  */
 function chargify_get_subscription_records($account) {
-  $subscriptions = array();
+  $records = array();
   $result = db_query("SELECT * FROM {chargify_subscriptions} WHERE uid = %d", $account->uid);
 
-  while ($subscription = db_fetch_object($result)) {
-    $subscriptions[$subscription->subscription_id] = $subscription;
+  while ($record = db_fetch_object($result)) {
+    $records[$record->subscription_id] = $record;
   }
 
-  return $subscriptions;
+  return $record;
 }
 
 /**
- * Store the chargify customer id to the db.
+ * Save chargify records for a user.
  *
  * @param $account
  *   The Drupal user object to save.
+ * @param $edit
+ *   An array of new stuff to save.
  */
-function chargify_user_insert(&$account) {
-  drupal_write_record('chargify_customers', $account);
+function chargify_user_save(&$account, &$edit) {
+  // Check to see if we're updating.
+  if (isset($edit['customer_id'])) {
+    if (isset($account->customer_id)) {
+      drupal_write_record('chargify_customers', $account, array('customer_id'));
+    }
+    // Otherwise, write a new row.
+    else {
+      $account->customer_id = $edit['customer_id'];
+      drupal_write_record('chargify_customers', $account);
+    }
+    unset($edit['customer_id']);
+  }
 
-  if (isset($account->subscriptions)) {
+  if (isset($edit['subscriptions'])) {
     $subscriptions = array();
 
-    foreach ($account->subscriptions as $key => $subscription) {
-      $subscription->uid = $account->uid;
-      $subscriptions[$key] = chargify_subscription_save($subscription);
+    foreach ($edit['subscriptions'] as $key => $subscription) {
+      if ($subscription instanceof chargify_subscription) {
+        $subscriptions[$key] = chargify_subscription_save_record($subscription, $account->uid);
+      }
     }
 
+    unset($edit['subscriptions']);
     $account->subscriptions = $subscriptions;
   }
 }
@@ -101,29 +123,32 @@ function chargify_user_insert(&$account) {
  *
  * @param $subscription
  *   An instance of the chargify_subscription class.
+ * @param $uid
+ *   Optional user id for this subscription. Include this to avoid an extra db query.
+ * @return
+ *   The database record.
  */
-function chargify_subscription_save($subscription, $uid = NULL) {
+function chargify_subscription_save_record($subscription, $uid = NULL) {
   $record = new stdClass();
   $product = $subscription->getProduct();
   $customer = $subscription->getCustomer();
+  $uid = is_null($uid) ? chargify_customer_id_to_uid($customer->getID()) : $uid;
 
   $record->subscription_id = $subscription->getId();
-  $record->product_handle = $product->getHandle();
-  $record->uid
-  if (!isset($subscription->product_handle) && isset($subscription->product) && is_object($subscription->product)) {
-    $subscription->product_handle = $subscription->product->product_handle;
-  }
+  $record->product_handle  = $product->getHandle();
+  $record->uid             = $uid;
+  $record->state           = $subscription->getState();
 
-  // If there's a record_id, we're updating an existing row.
-  if (isset($subscription->record_id)) {
-    drupal_write_record('chargify_subscriptions', $subscription, array('record_id'));
+  // Check to see if we're updating.
+  if (db_result(db_query("SELECT COUNT(*) FROM {chargify_subscriptions} WHERE subscription_id = %d", $record->subscription_id)) > 0) {
+    drupal_write_record('chargify_subscriptions', $record, array('subscription_id'));
   }
   // Otherwise, write a new row.
   else {
-    drupal_write_record('chargify_subscriptions', $subscription);
+    drupal_write_record('chargify_subscriptions', $record);
   }
 
-  return $subscription;
+  return $record;
 }
 
 /**
