@@ -18,6 +18,19 @@ define('CHARGIFY_CLOSED', 'closed');
 define('CHARGIFY_EXPIRED', 'expired');
 
 /**
+ * Implementation of hook_theme().
+ */
+function chargify_theme() {
+  $items = array();
+
+  $items['chargify_subscription_state'] = array(
+    'arguments' => array('state' => ''),
+  );
+
+  return $items;
+}
+
+/**
  * Implementation of hook_user().
  */
 function chargify_user($op, &$edit, &$account, $category = NULL) {
@@ -42,6 +55,36 @@ function chargify_user($op, &$edit, &$account, $category = NULL) {
       }
       break;
   }
+}
+
+/**
+ * Theme callback to return a chargify state
+ */
+function theme_chargify_subscription_state($state = '') {
+  if ($label = chargify_subscription_state($state)) {
+    return "<div class='chargify-state $state'>$label</div>";
+  }
+}
+
+/**
+ * Helper to return a state passed through t().
+ */
+function chargify_subscription_state($state) {
+  static $states = array();
+
+  if (empty($states)) {
+    $states = array(
+      CHARGIFY_TRIALING => t('Trialing'),
+      CHARGIFY_ACTIVE => t('Active'),
+      CHARGIFY_SOFT_FAILURE => t('Soft Failure'),
+      CHARGIFY_PAST_DUE => t('Past Due'),
+      CHARGIFY_SUSPENDED => t('Suspended'),
+      CHARGIFY_CLOSED => t('Closed'),
+      CHARGIFY_EXPIRED => t('Expired'),
+    );
+  }
+
+  return $states[$state];
 }
 
 /**
