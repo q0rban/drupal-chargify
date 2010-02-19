@@ -114,7 +114,8 @@ function chargify_user_save(&$account, &$edit) {
     }
 
     unset($edit['subscriptions']);
-    $account->subscriptions = $subscriptions;
+    $account->subscriptions = isset($account->subscriptions) ? $account->subscriptions : array();
+    $account->subscriptions += $subscriptions;
   }
 }
 
