@@ -25,6 +25,11 @@ function chargify_theme() {
 
   $items['chargify_subscription_state'] = array(
     'arguments' => array('state' => ''),
+    'file' => 'chargify.theme.inc',
+  );
+  $items['chargify_product_price'] = array(
+    'arguments' => array('product' => NULL),
+    'file' => 'chargify.theme.inc',
   );
 
   return $items;
@@ -54,15 +59,6 @@ function chargify_user($op, &$edit, &$account, $category = NULL) {
         chargify_user_delete($account);
       }
       break;
-  }
-}
-
-/**
- * Theme callback to return a chargify state
- */
-function theme_chargify_subscription_state($state = '') {
-  if ($label = chargify_subscription_state($state)) {
-    return "<div class='chargify-state $state'>$label</div>";
   }
 }
 
