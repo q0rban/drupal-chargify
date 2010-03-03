@@ -192,6 +192,16 @@ function chargify_subscription_save_record($subscription, $uid = NULL) {
 }
 
 /**
+ * Deletes a subscription record.
+ *
+ * @param $subscription_id
+ *   The id of the subscription to delete
+ */
+function chargify_subscription_delete_record($subscription_id) {
+  db_query("DELETE FROM {chargify_subscriptions} WHERE subscription_id = %d", $subscription_id);
+}
+
+/**
  * Loads the Chargify customer id from a Drupal user ID.
  */
 function chargify_uid_to_customer_id($uid) {
