@@ -18,49 +18,6 @@ define('CHARGIFY_CLOSED', 'closed');
 define('CHARGIFY_EXPIRED', 'expired');
 
 /**
- * Implementation of hook_menu().
- */
-function chargify_menu() {
-  $items = array();
-
-  if (function_exists('json_decode')) {
-    $items['chargify-postback'] = array(
-      'page callback' => 'chargify_postback_callback',
-      'type' => MENU_CALLBACK,
-      'access callback' => TRUE,
-    );
-  }
-
-  return $items;
-}
-
-/**
- * Page callback for chargify-postback.
- */
-function chargify_postback_callback() {
-  $json = file_get_contents("php://input");
-  if (($customers = json_decode($json)) && is_array($customers)) {
-    chargify_postback($customers);
-  }
-}
-
-/**
- * Store an array of customers that need to be updated.
- */
-function chargify_postback($customers) {
-  if ($customers) {
-    // Check to see if there's any customers still in the variable and merge them together.
-    if ($existing_customers = variable_get('chargify_customer_update_queue', array())) {
-      $customers = array_merge($existing_customers, $customers);
-    }
-
-    // Ensure there are no duplicates and save the var.
-    $customers = array_unique($customers);
-    variable_set('chargify_customer_update_queue', $customers);
-  }
-}
-
-/**
  * Implementation of hook_theme().
  */
 function chargify_theme() {
