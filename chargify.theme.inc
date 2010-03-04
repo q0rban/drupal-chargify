@@ -25,10 +25,10 @@ function theme_chargify_product_price($product) {
     $divider = t('per');
     $interval = $product->getIntervalUnit();
 
-    $output = "<div class='chargify-product-price'>\n";
-    $output .= "<span class='price'>{$denom}{$price}</span>\n";
-    $output .= "&nbsp;<span class='divider'>$divider</span>\n";
-    $output .= "&nbsp;<span class='interval'>$interval.</span>\n";
+    $output = "<div class='chargify-product-price'>";
+    $output .= "<span class='price'>{$denom}{$price}</span>";
+    $output .= "&nbsp;<span class='divider'>$divider</span>";
+    $output .= "&nbsp;<span class='interval'>$interval.</span>";
     $output .= "</div>";
 
     return $output;
