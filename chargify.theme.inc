@@ -28,7 +28,7 @@ function theme_chargify_product_price($product) {
     $output = "<div class='chargify-product-price'>";
     $output .= "<span class='price'>{$denom}{$price}</span>";
     $output .= "&nbsp;<span class='divider'>$divider</span>";
-    $output .= "&nbsp;<span class='interval'>$interval.</span>";
+    $output .= "&nbsp;<span class='interval'>$interval</span>";
     $output .= "</div>";
 
     return $output;
