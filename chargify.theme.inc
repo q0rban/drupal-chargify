@@ -11,7 +11,7 @@
  */
 function theme_chargify_subscription_state($state = '') {
   if ($label = chargify_subscription_state($state)) {
-    return "<div class='chargify-state $state'>$label</div>";
+    return "<div class='chargify-state chargify-state-$state'>$label</div>";
   }
 }
 
