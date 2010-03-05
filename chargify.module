@@ -63,6 +63,15 @@ function chargify_user($op, &$edit, &$account, $category = NULL) {
 }
 
 /**
+ * Implementation of hook_views_api().
+ */
+function chargify_views_api() {
+  return array(
+    'api' => 2,
+  );
+}
+
+/**
  * Helper to return a state passed through t().
  */
 function chargify_subscription_state($state) {
