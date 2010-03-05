@@ -1,4 +1,4 @@
-; $Id$
+; $Id: chargify.info,v 1.1 2010/03/05 21:01:12 q0rban Exp $
 name = Chargify Module
 description = Schema and Views for Chargify Subscriptions
 package = Chargify
