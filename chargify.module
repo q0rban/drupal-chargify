@@ -1,5 +1,5 @@
 <?php
-// $Id: chargify.module,v 1.1 2010/03/05 21:01:12 q0rban Exp $
+// $Id: chargify.module,v 1.2 2010/03/08 20:38:34 q0rban Exp $
 
 /**
  * @file
@@ -69,6 +69,36 @@ function chargify_views_api() {
   return array(
     'api' => 2,
   );
+}
+
+/**
+ * Implementation of hook_chargify_api_postback().
+ */
+function chargify_chargify_api_postback($customers) {
+  chargify_customer_update_batch($customers);
+}
+
+/**
+ * Starts a batch operation to update an array of customers.
+ *
+ * @param $customers
+ *   An array of Chargify customer IDs to update.
+ */
+function chargify_customer_update_batch($customers) {
+  $ops = array();
+
+  foreach ($customers as $customer_id) {
+    $ops[] = array('chargify_customer_update_batch_op', $customer_id);
+  }
+
+  $batch = array(
+    'operations' => $ops,
+    'finished' => 'chargify_customer_update_batch_finished',
+    'file' => drupal_get_path('chargify') .'/chargify.batch.inc',
+  );
+
+  batch_set($batch);
+  batch_process(); 
 }
 
 /**
