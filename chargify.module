@@ -1,5 +1,5 @@
 <?php
-// $Id: chargify.module,v 1.2 2010/03/08 20:38:34 q0rban Exp $
+// $Id: chargify.module,v 1.3 2010/03/09 16:37:53 q0rban Exp $
 
 /**
  * @file
@@ -94,7 +94,7 @@ function chargify_customer_update_batch($customers) {
   $batch = array(
     'operations' => $ops,
     'finished' => 'chargify_customer_update_batch_finished',
-    'file' => drupal_get_path('chargify') .'/chargify.batch.inc',
+    'file' => drupal_get_path('module', 'chargify') .'/chargify.batch.inc',
   );
 
   batch_set($batch);
