@@ -1,5 +1,5 @@
 <?php
-// $Id: chargify.batch.inc,v 1.2 2010/03/09 17:30:33 q0rban Exp $
+// $Id: chargify.batch.inc,v 1.3 2010/03/09 23:00:52 q0rban Exp $
 
 /**
  * @file
