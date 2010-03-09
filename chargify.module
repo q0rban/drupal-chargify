@@ -75,6 +75,9 @@ function chargify_views_api() {
  * Implementation of hook_chargify_api_postback().
  */
 function chargify_chargify_api_postback($customers) {
+  $originals = variable_get('chargify_customer_update_queue', array());
+  $customers = array_unique(array_merge($originals, $customers));
+  variable_set('chargify_customer_update_queue', $customers);
   chargify_customer_update_batch($customers);
 }
 
