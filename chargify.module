@@ -1,5 +1,5 @@
 <?php
-// $Id: chargify.module,v 1.3 2010/03/09 16:37:53 q0rban Exp $
+// $Id: chargify.module,v 1.4 2010/03/09 17:30:33 q0rban Exp $
 
 /**
  * @file
@@ -88,7 +88,7 @@ function chargify_customer_update_batch($customers) {
   $ops = array();
 
   foreach ($customers as $customer_id) {
-    $ops[] = array('chargify_customer_update_batch_op', $customer_id);
+    $ops[] = array('chargify_customer_update_batch_op', array($customer_id));
   }
 
   $batch = array(
@@ -211,6 +211,9 @@ function chargify_subscription_save_record($subscription, $uid = NULL) {
   $record = new stdClass();
   $product = $subscription->getProduct();
   $customer = $subscription->getCustomer();
+  drupal_set_message(print_r($product, 1));
+  drupal_set_message(print_r($customer, 1));
+
   $uid = is_null($uid) ? chargify_customer_id_to_uid($customer->getID()) : $uid;
 
   $record->subscription_id = $subscription->getId();
