@@ -74,29 +74,26 @@ function chargify_views_api() {
 /**
  * Implementation of hook_chargify_api_postback().
  */
-function chargify_chargify_api_postback($customers) {
-  $originals = variable_get('chargify_customer_update_queue', array());
-  $customers = array_unique(array_merge($originals, $customers));
-  variable_set('chargify_customer_update_queue', $customers);
-  chargify_customer_update_batch($customers);
+function chargify_chargify_api_postback($subscriptions) {
+  chargify_subscription_update_batch($subscriptions);
 }
 
 /**
  * Starts a batch operation to update an array of customers.
  *
- * @param $customers
+ * @param $subscriptions
  *   An array of Chargify customer IDs to update.
  */
-function chargify_customer_update_batch($customers) {
+function chargify_subscription_update_batch($subscriptions) {
   $ops = array();
 
-  foreach ($customers as $customer_id) {
-    $ops[] = array('chargify_customer_update_batch_op', array($customer_id));
+  foreach ($subscriptions as $subscription_id) {
+    $ops[] = array('chargify_subscription_update_batch_op', array($subscription_id));
   }
 
   $batch = array(
     'operations' => $ops,
-    'finished' => 'chargify_customer_update_batch_finished',
+    'finished' => 'chargify_subscription_update_batch_finished',
     'file' => drupal_get_path('module', 'chargify') .'/chargify.batch.inc',
   );
 
@@ -214,10 +211,7 @@ function chargify_subscription_save_record($subscription, $uid = NULL) {
   $record = new stdClass();
   $product = $subscription->getProduct();
   $customer = $subscription->getCustomer();
-  drupal_set_message(print_r($product, 1));
-  drupal_set_message(print_r($customer, 1));
-
-  $uid = is_null($uid) ? chargify_customer_id_to_uid($customer->getID()) : $uid;
+  $uid = is_null($uid) ? chargify_customer_id_to_uid($customer->getId()) : $uid;
 
   $record->subscription_id = $subscription->getId();
   $record->product_handle  = $product->getHandle();
