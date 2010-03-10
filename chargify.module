@@ -1,5 +1,5 @@
 <?php
-// $Id: chargify.module,v 1.6 2010/03/10 15:23:48 q0rban Exp $
+// $Id: chargify.module,v 1.7 2010/03/10 15:53:35 q0rban Exp $
 
 /**
  * @file
@@ -16,6 +16,7 @@ define('CHARGIFY_PAST_DUE', 'past_due');
 define('CHARGIFY_SUSPENDED', 'suspended');
 define('CHARGIFY_CLOSED', 'closed');
 define('CHARGIFY_EXPIRED', 'expired');
+define('CHARGIFY_CANCELED', 'canceled');
 
 /**
  * Implementation of hook_theme().
@@ -123,6 +124,7 @@ function chargify_subscription_state($state) {
       CHARGIFY_SUSPENDED => t('Suspended'),
       CHARGIFY_CLOSED => t('Closed'),
       CHARGIFY_EXPIRED => t('Expired'),
+      CHARGIFY_CANCELED => t('Cancelled'),
     );
   }
 
