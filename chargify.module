@@ -1,5 +1,5 @@
 <?php
-// $Id: chargify.module,v 1.5 2010/03/09 23:00:52 q0rban Exp $
+// $Id: chargify.module,v 1.6 2010/03/10 15:23:48 q0rban Exp $
 
 /**
  * @file
@@ -95,9 +95,16 @@ function chargify_subscription_update_batch($subscriptions) {
     'operations' => $ops,
     'finished' => 'chargify_subscription_update_batch_finished',
     'file' => drupal_get_path('module', 'chargify') .'/chargify.batch.inc',
+    'progressive' => FALSE,
   );
 
   batch_set($batch);
+
+  // We need to manually set the progressive variable again.
+  // @todo Remove when http://drupal.org/node/638712 is fixed.
+  $batch =& batch_get();
+  $batch['progressive'] = FALSE; 
+
   batch_process(); 
 }
 
