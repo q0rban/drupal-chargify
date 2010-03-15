@@ -1,5 +1,5 @@
 <?php
-// $Id: chargify.module,v 1.7 2010/03/10 15:53:35 q0rban Exp $
+// $Id: chargify.module,v 1.8 2010/03/15 16:05:02 q0rban Exp $
 
 /**
  * @file
@@ -10,13 +10,13 @@
  */
 
 define('CHARGIFY_TRIALING', 'trialing');
+define('CHARGIFY_ASSESSING', 'assessing');
 define('CHARGIFY_ACTIVE', 'active');
 define('CHARGIFY_SOFT_FAILURE', 'soft_failure');
 define('CHARGIFY_PAST_DUE', 'past_due');
 define('CHARGIFY_SUSPENDED', 'suspended');
-define('CHARGIFY_CLOSED', 'closed');
-define('CHARGIFY_EXPIRED', 'expired');
 define('CHARGIFY_CANCELED', 'canceled');
+define('CHARGIFY_EXPIRED', 'expired');
 
 /**
  * Implementation of hook_theme().
@@ -118,13 +118,13 @@ function chargify_subscription_state($state) {
   if (empty($states)) {
     $states = array(
       CHARGIFY_TRIALING => t('Trialing'),
+      CHARGIFY_ASSESSING => t('Assessing'),
       CHARGIFY_ACTIVE => t('Active'),
       CHARGIFY_SOFT_FAILURE => t('Soft Failure'),
       CHARGIFY_PAST_DUE => t('Past Due'),
       CHARGIFY_SUSPENDED => t('Suspended'),
-      CHARGIFY_CLOSED => t('Closed'),
-      CHARGIFY_EXPIRED => t('Expired'),
       CHARGIFY_CANCELED => t('Cancelled'),
+      CHARGIFY_EXPIRED => t('Expired'),
     );
   }
 
