@@ -1,5 +1,5 @@
 <?php
-// $Id: chargify.theme.inc,v 1.1 2010/03/05 21:01:12 q0rban Exp $
+// $Id: chargify.theme.inc,v 1.2 2010/03/15 15:45:23 q0rban Exp $
 
 /**
  * @file
@@ -20,17 +20,19 @@ function theme_chargify_subscription_state($state = '') {
  */
 function theme_chargify_product_price($product) {
   if (is_object($product)) {
-    $denom = '<span class="denom">$</span>';
-    $price = $product->getPriceInDollars();
-    $divider = t('per');
-    $interval = $product->getIntervalUnit();
+    $default = '<span class="price"><span class="denom">@denom</span>@price</span> <span class="divider">every</span>';
+    $singular = $default .' <span class="interval">@interval-unit</span>';
+    $plural = $default .' <span class="interval">@interval-num @interval-units</span>';
 
-    $output = "<div class='chargify-product-price'>";
-    $output .= "<span class='price'>{$denom}{$price}</span>";
-    $output .= "&nbsp;<span class='divider'>$divider</span>";
-    $output .= "&nbsp;<span class='interval'>$interval</span>";
-    $output .= "</div>";
+    $args = array(
+      '@denom' => '$',
+      '@price' => $product->getPriceInDollars(),
+      '@interval-num' => $product->getInterval(),
+      '@interval-unit' => $product->getIntervalUnit(),
+    );
 
-    return $output;
+    $text = format_plural($product->getInterval(), $singular, $plural, $args);
+
+    return "<div class='chargify-product-price'>$text</div>";
   }
 }
